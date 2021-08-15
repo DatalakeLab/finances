@@ -26,7 +26,7 @@ print ('import data set and create a data frame')
 df_credit = pd.read_csv('http://dl.dropboxusercontent.com/s/xn2a4kzf0zer0xu/acquisition_train.csv?dl=0')
 
 print ('Credit  DataSet size')
-print (df_credit.sharp[0])
+print (df_credit.shape[0])
 
 # show first 5 rows
 print ('Head: show first 5 rows')
@@ -237,11 +237,11 @@ print(classification_report(y_test, y_pred_xgb))
 
 print ('Classifier Time in ms');
 total_classifier = end_classifier - begin_classifier
-print (total_classifier/1000)
+print (total_classifier*1000)
 
 print ('Prediction Time in ms');
 total_prediction = end_prediction - begin_prediction
-print (total_prediction/1000)
+print (total_prediction*1000)
 # confusion matrix
 #print ('confusion matrix')
 #fig, ax = plt.subplots()
