@@ -26,7 +26,7 @@ print ('import data set and create a data frame')
 df_credit = pd.read_csv('http://dl.dropboxusercontent.com/s/xn2a4kzf0zer0xu/acquisition_train.csv?dl=0')
 
 print ('Credit  DataSet size')
-print (df_credit.size)
+print (df_credit.sharp[0])
 
 # show first 5 rows
 print ('Head: show first 5 rows')
