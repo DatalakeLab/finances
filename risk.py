@@ -13,8 +13,6 @@ from sklearn.metrics import accuracy_score, f1_score, confusion_matrix, classifi
 from sklearn.pipeline import make_pipeline
 from sklearn.model_selection import StratifiedKFold
 from xgboost import XGBClassifier
-from lightgbm import LGBMClassifier
-from catboost import CatBoostClassifier
 
 # set the aesthetic style of the plots
 sns.set_style()
@@ -47,6 +45,7 @@ print('Number of columns: ', df_credit.shape[1])
 df_credit.info()
 
 # percentage of missing values per feature
+print('percentage of missing values per feature')
 print((df_credit.isnull().sum() * 100 / df_credit.shape[0]).sort_values(ascending=False))
 
 df_credit.dropna(subset=['target_default'], inplace=True)
@@ -66,6 +65,7 @@ df_credit.drop(labels=['email', 'reason', 'zip', 'job_name', 'external_data_prov
                        'profile_phone_number', 'application_time_applied', 'ids'], axis=1, inplace=True)
                        
 # show descriptive statistics
+print ('show descriptive statistics')
 df_credit.describe()
 
 
@@ -89,6 +89,7 @@ df_credit_numerical = df_credit[['score_3', 'risk_rate', 'last_amount_borrowed',
                                  
 
 # plot a histogram for each of the features above 
+print ('plot a histogram for each of the features above ')
 
 nrows = 3
 ncols = 4
@@ -187,61 +188,66 @@ def val_model(X, y, clf, show=True):
     scores = cross_val_score(pipeline, X, y, scoring='recall')
 
     if show == True:
-        print(f'Recall: {scores.mean()}, {scores.std()}')
+        print("Recall:")
+        print (scores.mean())
+        print (scores.std())
     
     return scores.mean()
     
     
     
 #evaluate the models
+print ('evaluate the models')
+print ('XGBClassifier')
 xgb = XGBClassifier()
-lgb = LGBMClassifier()
-cb = CatBoostClassifier()
 
 model = []
 recall = []
 
-for clf in (xgb, lgb, cb):
-    model.append(clf.__class__.__name__)
-    recall.append(val_model(X_train_rus, y_train_rus, clf, show=False))
+#for clf in (xgb, lgb, cb):
+#for clf in (xgb):
+#    model.append(clf.__class__.__name__)
+#    recall.append(val_model(X_train_rus, y_train_rus, clf, show=False))
+#
+#pd.DataFrame(data=recall, index=model, columns=['Recall'])
 
-pd.DataFrame(data=recall, index=model, columns=['Recall'])
 
-
-# LightGBM
-lbg = LGBMClassifier(silent=False)
+# XGBoost
+xgb = XGBClassifier()
 
 # parameter to be searched
-param_grid = {"max_depth": np.arange(5, 75, 10),
-              "learning_rate" : [0.001, 0.01, 0.1],
-              "num_leaves": np.arange(20, 220, 50),
-             }
+param_grid = {'n_estimators': range(0,1000,50)}
 
-# find the best parameter            
+# find the best parameter   
 kfold = StratifiedKFold(n_splits=3, shuffle=True)
-grid_search = GridSearchCV(lbg, param_grid, scoring="recall", n_jobs=-1, cv=kfold)
+grid_search = GridSearchCV(xgb, param_grid, scoring="recall", n_jobs=-1, cv=kfold)
 grid_result = grid_search.fit(X_train_rus, y_train_rus)
 
-print(f'Best result: {grid_result.best_score_} for {grid_result.best_params_}')
+print('Best result:')
+print(grid_result.best_score_)
+print(grid_result.best_params_)
 
-# final LightGBM model
-lgb = LGBMClassifier(num_leaves=70, max_depth=5, learning_rate=0.01, min_data_in_leaf=400)
-lgb.fit(X_train_rus, y_train_rus)
+
+
+# final XGBoost model
+xgb = XGBClassifier(max_depth=3, learning_rate=0.0001, n_estimators=50, gamma=1, min_child_weight=6)
+xgb.fit(X_train_rus, y_train_rus)
 
 # prediction
-X_test_lgb = scaler.transform(X_test)
-y_pred_lgb = lgb.predict(X_test_lgb)
+X_test_xgb = scaler.transform(X_test)
+y_pred_xgb = xgb.predict(X_test_xgb)
 
 # classification report
-print(classification_report(y_test, y_pred_lgb))
+print ('classification report')
+print(classification_report(y_test, y_pred_xgb))
 
 # confusion matrix
+print ('confusion matrix')
 fig, ax = plt.subplots()
-sns.heatmap(confusion_matrix(y_test, y_pred_lgb, normalize='true'), annot=True, ax=ax)
-ax.set_title('Confusion Matrix - LightGBM')
+sns.heatmap(confusion_matrix(y_test, y_pred_xgb, normalize='true'), annot=True, ax=ax)
+ax.set_title('Confusion Matrix - XGBoost')
 ax.set_xlabel('Predicted Value')
 ax.set_ylabel('Real Value')
 
 plt.show()
-
 
