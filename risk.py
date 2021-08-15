@@ -93,25 +93,25 @@ df_credit_numerical = df_credit[['score_3', 'risk_rate', 'last_amount_borrowed',
                                  
 
 # plot a histogram for each of the features above 
-print ('plot a histogram for each of the features above ')
+#print ('plot a histogram for each of the features above ')
 
-nrows = 3
-ncols = 4
+#nrows = 3
+#ncols = 4
 
-fig, ax = plt.subplots(nrows=nrows, ncols=ncols, figsize=(25, 16))
+#fig, ax = plt.subplots(nrows=nrows, ncols=ncols, figsize=(25, 16))
 
-r = 0
-c = 0
+#r = 0
+#c = 0
 
-for i in df_credit_numerical:
-  sns.distplot(df_credit_numerical[i], bins=15,kde=False, ax=ax[r][c])
-  if c == ncols - 1:
-    r += 1
-    c = 0
-  else:
-    c += 1
+#for i in df_credit_numerical:
+#  sns.distplot(df_credit_numerical[i], bins=15,kde=False, ax=ax[r][c])
+#  if c == ncols - 1:
+#    r += 1
+#    c = 0
+#  else:
+#    c += 1
 
-plt.show()
+#plt.show()
 
 
 
