@@ -32,16 +32,20 @@ mpl.rcParams['grid.color'] = COLOR
 mpl.rcParams['grid.alpha'] = 0.1
 
 # import data set and create a data frame
+print ('import data set and create a data frame')
 df_credit = pd.read_csv('http://dl.dropboxusercontent.com/s/xn2a4kzf0zer0xu/acquisition_train.csv?dl=0')
 
 # show first 5 rows
+print ('Head: show first 5 rows')
 df_credit.head()
 
 # data frame shape
+print ('data frame shape')
 print('Number of rows: ', df_credit.shape[0])
 print('Number of columns: ', df_credit.shape[1])
 
 # data frame summary
+print ('data frame summary')
 df_credit.info()
 
 # percentage of missing values per feature
