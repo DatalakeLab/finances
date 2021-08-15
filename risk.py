@@ -13,27 +13,20 @@ from sklearn.metrics import accuracy_score, f1_score, confusion_matrix, classifi
 from sklearn.pipeline import make_pipeline
 from sklearn.model_selection import StratifiedKFold
 from xgboost import XGBClassifier
+from timeit import default_timer as timer
 
-# set the aesthetic style of the plots
-sns.set_style()
+
 
 # filter warning messages
 import warnings
 warnings.filterwarnings('ignore')
 
-# set default matplotlib parameters
-COLOR = '#ababab'
-mpl.rcParams['figure.titlesize'] = 16
-mpl.rcParams['text.color'] = 'black'
-mpl.rcParams['axes.labelcolor'] = COLOR
-mpl.rcParams['xtick.color'] = COLOR
-mpl.rcParams['ytick.color'] = COLOR
-mpl.rcParams['grid.color'] = COLOR
-mpl.rcParams['grid.alpha'] = 0.1
-
 # import data set and create a data frame
 print ('import data set and create a data frame')
 df_credit = pd.read_csv('http://dl.dropboxusercontent.com/s/xn2a4kzf0zer0xu/acquisition_train.csv?dl=0')
+
+print ('Credit  DataSet size')
+print (df_credit.size)
 
 # show first 5 rows
 print ('Head: show first 5 rows')
@@ -92,29 +85,6 @@ df_credit_numerical = df_credit[['score_3', 'risk_rate', 'last_amount_borrowed',
                                  'external_data_provider_email_seen_before']]
                                  
 
-# plot a histogram for each of the features above 
-#print ('plot a histogram for each of the features above ')
-
-#nrows = 3
-#ncols = 4
-
-#fig, ax = plt.subplots(nrows=nrows, ncols=ncols, figsize=(25, 16))
-
-#r = 0
-#c = 0
-
-#for i in df_credit_numerical:
-#  sns.distplot(df_credit_numerical[i], bins=15,kde=False, ax=ax[r][c])
-#  if c == ncols - 1:
-#    r += 1
-#    c = 0
-#  else:
-#    c += 1
-
-#plt.show()
-
-
-
 df_credit_num = df_credit.select_dtypes(exclude='object').columns
 df_credit_cat = df_credit.select_dtypes(include='object').columns
 
@@ -155,6 +125,7 @@ df_credit_encoded.head()
 
 
 #******************** split the data into training and test sets
+
 print ('split the data into training and test sets')
 # feature matrix
 X = df_credit_encoded.drop('target_default', axis=1)
@@ -242,26 +213,42 @@ print(grid_result.best_params_)
 
 
 # final XGBoost model
+begin_classifier = timer()
+
 print ('final XGBoost model')
 xgb = XGBClassifier(max_depth=3, learning_rate=0.0001, n_estimators=50, gamma=1, min_child_weight=6)
 xgb.fit(X_train_rus, y_train_rus)
 
+end_classifier = timer()
+
 # prediction
+
+begin_prediction = timer()
+
 print ('prediction')
 X_test_xgb = scaler.transform(X_test)
 y_pred_xgb = xgb.predict(X_test_xgb)
 
 # classification report
+end_prediction = timer()
+
 print ('classification report')
 print(classification_report(y_test, y_pred_xgb))
 
-# confusion matrix
-print ('confusion matrix')
-fig, ax = plt.subplots()
-sns.heatmap(confusion_matrix(y_test, y_pred_xgb, normalize='true'), annot=True, ax=ax)
-ax.set_title('Confusion Matrix - XGBoost')
-ax.set_xlabel('Predicted Value')
-ax.set_ylabel('Real Value')
+print ('Classifier Time in ms');
+total_classifier = end_classified - begin_classifier
+print (total_classifier/1000)
 
-plt.show()
+print ('Prediction Time in ms');
+total_prediction = end_prediction - begin_prediction
+print (total_prediction/1000)
+# confusion matrix
+#print ('confusion matrix')
+#fig, ax = plt.subplots()
+#sns.heatmap(confusion_matrix(y_test, y_pred_xgb, normalize='true'), annot=True, ax=ax)
+#ax.set_title('Confusion Matrix - XGBoost')
+#ax.set_xlabel('Predicted Value')
+#ax.set_ylabel('Real Value')
+
+#plt.show()
 
