@@ -155,6 +155,7 @@ df_credit_encoded.head()
 
 
 #******************** split the data into training and test sets
+print ('split the data into training and test sets')
 # feature matrix
 X = df_credit_encoded.drop('target_default', axis=1)
 
@@ -164,6 +165,7 @@ y = df_credit_encoded['target_default']
 X_train, X_test, y_train, y_test = train_test_split(X, y, shuffle=True, stratify=y)
 
 # standardize numerical variables
+print ('standardize numerical variables')
 scaler = StandardScaler().fit(X_train)
 X_train = scaler.transform(X_train)
 
@@ -234,10 +236,12 @@ print(grid_result.best_params_)
 
 
 # final XGBoost model
+print ('final XGBoost model')
 xgb = XGBClassifier(max_depth=3, learning_rate=0.0001, n_estimators=50, gamma=1, min_child_weight=6)
 xgb.fit(X_train_rus, y_train_rus)
 
 # prediction
+print ('prediction')
 X_test_xgb = scaler.transform(X_test)
 y_pred_xgb = xgb.predict(X_test_xgb)
 
