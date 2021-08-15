@@ -236,7 +236,7 @@ print ('classification report')
 print(classification_report(y_test, y_pred_xgb))
 
 print ('Classifier Time in ms');
-total_classifier = end_classified - begin_classifier
+total_classifier = end_classifier - begin_classifier
 print (total_classifier/1000)
 
 print ('Prediction Time in ms');
