@@ -219,14 +219,20 @@ recall = []
 
 
 # XGBoost
+print ('XGBoost')
+
 xgb = XGBClassifier()
 
 # parameter to be searched
+print ('parameter to be searched')
 param_grid = {'n_estimators': range(0,1000,50)}
 
-# find the best parameter   
+# find the best parameter  
+print ('find the best parameter: kfold')
 kfold = StratifiedKFold(n_splits=3, shuffle=True)
+print ('find the best parameter: grid_search')
 grid_search = GridSearchCV(xgb, param_grid, scoring="recall", n_jobs=-1, cv=kfold)
+print ('find the best parameter: grid_result')
 grid_result = grid_search.fit(X_train_rus, y_train_rus)
 
 print('Best result:')
