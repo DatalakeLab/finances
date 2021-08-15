@@ -79,14 +79,14 @@ df_credit['reported_income'] = df_credit['reported_income'].replace(np.inf, np.n
 df_credit.loc[df_credit['external_data_provider_email_seen_before'] == -999, 'external_data_provider_email_seen_before'] = np.nan
 
 # data frame containing numerical features
-df_credit_numerical = df_credit[['score_3', 'risk_rate', 'last_amount_borrowed', 
-                                 'last_borrowed_in_months', 'credit_limit', 'income', 'ok_since', 
-                                 'n_bankruptcies', 'n_defaulted_loans', 'n_accounts', 'n_issues', 
-                                 'external_data_provider_email_seen_before']]
+df_credit_numerical = df_credit[['score_3', 'risk_rate', 'last_amount_borrowed', 'last_borrowed_in_months', 'credit_limit', 'income', 'ok_since', 'n_bankruptcies', 'n_defaulted_loans', 'n_accounts', 'n_issues', 'external_data_provider_email_seen_before']]
                                  
 
-df_credit_num = df_credit.select_dtypes(exclude='object').columns
-df_credit_cat = df_credit.select_dtypes(include='object').columns
+df_credit_num = df_credit.select_dtypes(exclude=object).columns
+
+
+#                                         \/
+df_credit_cat = df_credit.select_dtypes(exclude=object).columns
 
 # fill missing values for "last_amount_borrowed", "last_borrowed_in_months" and "n_issues"
 df_credit['last_amount_borrowed'].fillna(value=0, inplace=True)
