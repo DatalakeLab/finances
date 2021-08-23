@@ -48,6 +48,7 @@ warnings.filterwarnings('ignore')
 # import data set and create a data frame
 uso ("import data set and create a data frame: BEGIN")
 df_credit = pd.read_csv('http://dl.dropboxusercontent.com/s/xn2a4kzf0zer0xu/acquisition_train.csv?dl=0')
+uso ("import data set and create a data frame: END")
 
 uso ("Credit  DataSet size")
 print (df_credit.shape[0])
@@ -149,9 +150,10 @@ df_credit_encoded.head()
 
 #******************** split the data into training and test sets
 
-uso ("split the data into training and test sets")
+uso ("split the data into training and test sets: BEGIN")
 # feature matrix
 X = df_credit_encoded.drop('target_default', axis=1)
+uso ("split the data into training and test sets: END")
 
 uso("target vector") 
 y = df_credit_encoded['target_default']
@@ -205,8 +207,9 @@ def val_model(X, y, clf, show=True):
     
 #evaluate the models
 uso ("evaluate the models")
-uso ("XGBClassifier")
+uso ("XGBClassifier: BEGIN")
 xgb = XGBClassifier()
+uso ("XGBClassifier: END")
 
 model = []
 recall = []
@@ -220,9 +223,9 @@ recall = []
 
 
 # XGBoost
-uso ("XGBoost")
-
+uso ("XGBoost: BEGIN")
 xgb = XGBClassifier()
+uso ("XGBoost: END")
 
 # parameter to be searched
 uso ("parameter to be searched")
@@ -242,14 +245,15 @@ print(grid_result.best_params_)
 
 
 
-uso ("final XGBoost model") 
 begin_classifier = timer()
 
-uso ("final XGBoost model")
+uso ("final XGBoost model: BEGIN")
 xgb = XGBClassifier(max_depth=3, learning_rate=0.0001, n_estimators=50, gamma=1, min_child_weight=6)
+uso ("final XGBoost model: END")
 
-uso ("fit")
+uso ("fit: BEGIN")
 xgb.fit(X_train_rus, y_train_rus)
+uso ("fit: END")
 
 end_classifier = timer()
 
@@ -257,11 +261,13 @@ end_classifier = timer()
 
 begin_prediction = timer()
 
-uso ("prediction test")
+uso ("prediction test: BEGIN")
 X_test_xgb = scaler.transform(X_test)
+uso ("prediction test: END")
 
-uso ("prediction pred")
+uso ("prediction pred: BEGIN")
 y_pred_xgb = xgb.predict(X_test_xgb)
+uso ("prediction pred: END")
 
 # classification report
 end_prediction = timer()
