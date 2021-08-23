@@ -14,35 +14,59 @@ from sklearn.pipeline import make_pipeline
 from sklearn.model_selection import StratifiedKFold
 from xgboost import XGBClassifier
 from timeit import default_timer as timer
+import psutil
+import resource
+import memory_profiler
+from memory_profiler import profile
 
-
+def uso(mensagem):
+    #usage = resource.getrusage(resource.RUSAGE_SELF)
+    #print ("**********************************************")
+    print (mensagem)
+    print ("CPU Usage: " + str(psutil.cpu_times()))
+    print ("CPU Percent:None: " + str(psutil.cpu_percent(interval=None, percpu=True)))
+    #print ("CPU Percent:1: " + str(psutil.cpu_percent(interval=1, percpu=True)))
+    #print ("CPU Percent:0.1: " + str(psutil.cpu_percent(interval=0.1, percpu=True)))
+    mem_usage = memory_profiler.memory_usage()[0]
+    print ("**** Memory Usage: " + str(mem_usage))
+    #for name, desc in [
+    # ('ru_utime', 'User time'),
+    # ('ru_stime', 'System time'),
+    # ('ru_maxrss', 'Max. Resident Set Size'),
+    # ('ru_ixrss', 'Shared Memory Size'),
+    # ('ru_idrss', 'Unshared Memory Size'),
+    # ('ru_isrss', 'Stack Size'),
+    # ('ru_inblock', 'Block inputs'),
+    # ('ru_oublock', 'Block outputs'),
+    # ]:
+    # print '%-25s (%-10s) = %s' % (desc, name, getattr(usage, name))
 
 # filter warning messages
 import warnings
 warnings.filterwarnings('ignore')
 
 # import data set and create a data frame
-print ('import data set and create a data frame')
+uso ("import data set and create a data frame: BEGIN")
 df_credit = pd.read_csv('http://dl.dropboxusercontent.com/s/xn2a4kzf0zer0xu/acquisition_train.csv?dl=0')
 
-print ('Credit  DataSet size')
+uso ("Credit  DataSet size")
 print (df_credit.shape[0])
 
 # show first 5 rows
-print ('Head: show first 5 rows')
+uso ("Head: show first 5 rows")
 df_credit.head()
 
 # data frame shape
-print ('data frame shape')
+uso ("data frame shape")
 print('Number of rows: ', df_credit.shape[0])
 print('Number of columns: ', df_credit.shape[1])
 
 # data frame summary
-print ('data frame summary')
+uso ("data frame summary")
 df_credit.info()
 
 # percentage of missing values per feature
-print('percentage of missing values per feature')
+uso("percentage of missing values per feature")
 print((df_credit.isnull().sum() * 100 / df_credit.shape[0]).sort_values(ascending=False))
 
 df_credit.dropna(subset=['target_default'], inplace=True)
@@ -62,43 +86,41 @@ df_credit.drop(labels=['email', 'reason', 'zip', 'job_name', 'external_data_prov
                        'profile_phone_number', 'application_time_applied', 'ids'], axis=1, inplace=True)
                        
 # show descriptive statistics
-print ('show descriptive statistics')
+uso ("show descriptive statistics")
 df_credit.describe()
 
 
-# count of "inf" values in "reported_income"
+uso ("count of inf values in reported_income")
 np.isinf(df_credit['reported_income']).sum()
 
-# count of values = -999 in "external_data_provider_email_seen_before"
+uso ("count of values = -999 in external_data_provider_email_seen_before")
 df_credit.loc[df_credit['external_data_provider_email_seen_before'] == -999, 'external_data_provider_email_seen_before'].value_counts()
 
-# replace "inf" values with "nan"
+uso ("replace inf values with nan")
 df_credit['reported_income'] = df_credit['reported_income'].replace(np.inf, np.nan)
 
-# replace "-999" values with "nan"
+uso ("replace -999 values with nan")
 df_credit.loc[df_credit['external_data_provider_email_seen_before'] == -999, 'external_data_provider_email_seen_before'] = np.nan
 
-# data frame containing numerical features
+uso("data frame containing numerical features") 
 df_credit_numerical = df_credit[['score_3', 'risk_rate', 'last_amount_borrowed', 'last_borrowed_in_months', 'credit_limit', 'income', 'ok_since', 'n_bankruptcies', 'n_defaulted_loans', 'n_accounts', 'n_issues', 'external_data_provider_email_seen_before']]
                                  
-
+uso("Excluding objects") 
 df_credit_num = df_credit.select_dtypes(exclude=object).columns
-
-
 #                                         \/
 df_credit_cat = df_credit.select_dtypes(exclude=object).columns
 
-# fill missing values for "last_amount_borrowed", "last_borrowed_in_months" and "n_issues"
+uso ("fill missing values for last_amount_borrowed, last_borrowed_in_months and n_issues")
 df_credit['last_amount_borrowed'].fillna(value=0, inplace=True)
 df_credit['last_borrowed_in_months'].fillna(value=0, inplace=True)
 df_credit['n_issues'].fillna(value=0, inplace=True)
 
-# fill missing values for numerical variables
+uso("fill missing values for numerical variables")
 imputer = SimpleImputer(missing_values=np.nan, strategy='median')
 imputer = imputer.fit(df_credit.loc[:, df_credit_num])
 df_credit.loc[:, df_credit_num] = imputer.transform(df_credit.loc[:, df_credit_num])
 
-# fill missing values for categorical variables
+uso("fill missing values for categorical variables")
 imputer = SimpleImputer(missing_values=np.nan, strategy='most_frequent')
 imputer = imputer.fit(df_credit.loc[:, df_credit_cat])
 df_credit.loc[:, df_credit_cat] = imputer.transform(df_credit.loc[:, df_credit_cat])
@@ -113,36 +135,41 @@ cat_var = [col for col in df_credit.select_dtypes(['object']).columns.tolist() i
 
 df_credit_encoded = df_credit.copy()
 
-# label encoding for the binary variables
+uso ("label encoding for the binary variables")
 le = LabelEncoder()
 for col in bin_var:
   df_credit_encoded[col] = le.fit_transform(df_credit_encoded[col])
 
-# encoding with get_dummies for the categorical variables
+uso("encoding with get_dummies for the categorical variables")
 df_credit_encoded = pd.get_dummies(df_credit_encoded, columns=cat_var)
 
+uso("head encoded")
 df_credit_encoded.head()
 
 
 #******************** split the data into training and test sets
 
-print ('split the data into training and test sets')
+uso ("split the data into training and test sets")
 # feature matrix
 X = df_credit_encoded.drop('target_default', axis=1)
 
-# target vector
+uso("target vector") 
 y = df_credit_encoded['target_default']
 
+uso("train: BEGIN") 
 X_train, X_test, y_train, y_test = train_test_split(X, y, shuffle=True, stratify=y)
+uso("train: END") 
 
-# standardize numerical variables
-print ('standardize numerical variables')
+uso("standardize numerical variables");
 scaler = StandardScaler().fit(X_train)
+
+uso("Transformer");
 X_train = scaler.transform(X_train)
 
-# resample
+uso ("resample: BEGIN")
 rus = RandomUnderSampler()
 X_train_rus, y_train_rus = rus.fit_sample(X_train, y_train)
+uso ("resample: END")
 
 # define the function val_model
 def val_model(X, y, clf, show=True):
@@ -157,11 +184,14 @@ def val_model(X, y, clf, show=True):
     # Returns
         float, mean value of the cross-validation scores.
     """
-    
+    uso ("make X array")
     X = np.array(X)
+    uso ("make y array")
     y = np.array(y)
 
+    uso ("make pipeline")
     pipeline = make_pipeline(StandardScaler(), clf)
+    uso ("Calcula Cross Val")
     scores = cross_val_score(pipeline, X, y, scoring='recall')
 
     if show == True:
@@ -174,8 +204,8 @@ def val_model(X, y, clf, show=True):
     
     
 #evaluate the models
-print ('evaluate the models')
-print ('XGBClassifier')
+uso ("evaluate the models")
+uso ("XGBClassifier")
 xgb = XGBClassifier()
 
 model = []
@@ -190,33 +220,35 @@ recall = []
 
 
 # XGBoost
-print ('XGBoost')
+uso ("XGBoost")
 
 xgb = XGBClassifier()
 
 # parameter to be searched
-print ('parameter to be searched')
+uso ("parameter to be searched")
 param_grid = {'n_estimators': range(0,1000,50)}
 
 # find the best parameter  
-print ('find the best parameter: kfold')
+uso ("find the best parameter: kfold")
 kfold = StratifiedKFold(n_splits=3, shuffle=True)
-print ('find the best parameter: grid_search')
+uso ("find the best parameter: grid_search")
 grid_search = GridSearchCV(xgb, param_grid, scoring="recall", n_jobs=-1, cv=kfold)
-print ('find the best parameter: grid_result')
+uso ("find the best parameter: grid_result")
 grid_result = grid_search.fit(X_train_rus, y_train_rus)
 
-print('Best result:')
+uso("Best result")
 print(grid_result.best_score_)
 print(grid_result.best_params_)
 
 
 
-# final XGBoost model
+uso ("final XGBoost model") 
 begin_classifier = timer()
 
-print ('final XGBoost model')
+uso ("final XGBoost model")
 xgb = XGBClassifier(max_depth=3, learning_rate=0.0001, n_estimators=50, gamma=1, min_child_weight=6)
+
+uso ("fit")
 xgb.fit(X_train_rus, y_train_rus)
 
 end_classifier = timer()
@@ -225,17 +257,19 @@ end_classifier = timer()
 
 begin_prediction = timer()
 
-print ('prediction')
+uso ("prediction test")
 X_test_xgb = scaler.transform(X_test)
+
+uso ("prediction pred")
 y_pred_xgb = xgb.predict(X_test_xgb)
 
 # classification report
 end_prediction = timer()
 
-print ('classification report')
+uso ("classification report")
 print(classification_report(y_test, y_pred_xgb))
 
-print ('Classifier Time in ms');
+uso ("Classifier Time in ms");
 total_classifier = end_classifier - begin_classifier
 print (total_classifier*1000)
 
